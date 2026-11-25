@@ -1,9 +1,31 @@
 import os
 import sys
+import msvcrt
 from pyspark.sql import SparkSession
 from utils import fmt4, print_table, write_table_file
 from data_processor import load_index, compute_all
 from query_engine import run_single_term_query, run_phrase_query, run_boolean_and, run_boolean_and_not
+
+
+def get_user_input_windows(prompt):
+    sys.stdout.write(prompt)
+    sys.stdout.flush()
+    input_str = ""
+    while True:
+        char = msvcrt.getwch()
+        if char == '\r':
+            print()
+            break
+        elif char == '\x08':
+            if len(input_str) > 0:
+                input_str = input_str[:-1]
+                sys.stdout.write('\b \b')
+                sys.stdout.flush()
+        else:
+            input_str += char
+            sys.stdout.write(char)
+            sys.stdout.flush()
+    return input_str
 
 
 def main():
@@ -69,13 +91,11 @@ def main():
     write_table_file(os.path.join(output_dir, "normalized_tfidf_matrix.txt"), "Normalized TF-IDF Matrix", ["Term"] + doc_ids, norm_rows_print)
 
     while True:
-        sys.stdout.flush()
-        user_input = input("\nEnter query (or 'quit' to exit): ").strip().lower()
-        if user_input.lower() == "quit":
+        user_input = get_user_input_windows("\nEnter query (or 'quit' to exit): ").strip().lower()
+        if not user_input or user_input == "quit":
+            print("Exiting application...")
             break
-        if not user_input:
-            continue
-        lower_input = user_input.lower()
+        lower_input = user_input
         if " and not " in lower_input:
             parts = lower_input.split(" and not ")
             phrase1 = parts[0].strip().split()
@@ -91,6 +111,7 @@ def main():
             run_phrase_query(term_list, df_pos, idf_map, norm_matrix, doc_ids, output_dir)
         else:
             run_single_term_query(lower_input, df_pos, idf_map, norm_matrix, doc_ids, output_dir)
+        sys.stdout.flush()
 
     spark.stop()
 

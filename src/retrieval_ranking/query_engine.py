@@ -13,7 +13,7 @@ def find_phrase_positions(df_pos, term_list):
         df_phrase = df_phrase.join(df_next, df_phrase.doc_id == df_next.doc_id)
         df_phrase = df_phrase.filter(F.col(f"pos{i}") == F.col(f"pos{i-1}") + 1)
     result = {}
-    for r in df_phrase.select("doc_id", "pos0").distinct().collect():
+    for r in df_phrase.select(F.col("t0.doc_id").alias("doc_id"), F.col("pos0")).distinct().collect():
         result.setdefault(r.doc_id, []).append(r.pos0)
     return result
 
