@@ -1,4 +1,5 @@
 import os
+import sys
 from pyspark.sql import SparkSession
 from utils import fmt4, print_table, write_table_file
 from data_processor import load_index, compute_all
@@ -68,7 +69,8 @@ def main():
     write_table_file(os.path.join(output_dir, "normalized_tfidf_matrix.txt"), "Normalized TF-IDF Matrix", ["Term"] + doc_ids, norm_rows_print)
 
     while True:
-        user_input = input("\nEnter query (or 'quit' to exit): ").strip()
+        sys.stdout.flush()
+        user_input = input("\nEnter query (or 'quit' to exit): ").strip().lower()
         if user_input.lower() == "quit":
             break
         if not user_input:

@@ -7,8 +7,10 @@ from utils import sort_doc_ids
 def load_index(json_path):
     with open(json_path, "r", encoding="utf-8") as f:
         index_dict = json.load(f)
-    first_term = list(index_dict.keys())[0]
-    doc_ids = sort_doc_ids(list(index_dict[first_term].keys()))
+    doc_ids = set()
+    for docs in index_dict.values():
+        doc_ids.update(docs.keys())
+    doc_ids = sort_doc_ids(list(doc_ids))
     N = len(doc_ids)
     return index_dict, doc_ids, N
 
@@ -28,19 +30,17 @@ def compute_all(spark, index_dict, doc_ids, N):
 
     df_df_idf = df_tf.groupBy("term").agg(
         countDistinct("doc_id").alias("DF"),
-        F.round(F.log10(F.lit(N) / countDistinct("doc_id")), 4).alias("IDF")
+        F.log10(F.lit(N) / countDistinct("doc_id")).alias("IDF")
     )
 
     df_tfidf = df_tf.join(df_df_idf, on="term", how="inner")
     df_tfidf = df_tfidf.withColumn(
         "weighted_tf",
-        F.when(F.col("raw_tf") > 0,
-               F.round(1 + F.log10(F.col("raw_tf")), 4))
-        .otherwise(F.lit(0))
+        F.when(F.col("raw_tf") > 0, 1 + F.log10(F.col("raw_tf"))).otherwise(F.lit(0))
     )
     df_tfidf = df_tfidf.withColumn(
         "tfidf",
-        F.round(F.col("weighted_tf") * F.col("IDF"), 4)
+        F.greatest(F.col("weighted_tf") * F.col("IDF"), F.lit(0))
     )
 
     tfidf_rows = df_tfidf.select(
@@ -63,7 +63,7 @@ def compute_all(spark, index_dict, doc_ids, N):
         idf_map[r.term] = float(r.IDF)
 
     df_doc_lengths = df_tfidf.groupBy("doc_id").agg(
-        F.round(F.sqrt(F.sum(F.col("tfidf") ** 2)), 4).alias("vector_length")
+        F.sqrt(F.sum(F.col("tfidf") ** 2)).alias("vector_length")
     ).orderBy("doc_id")
 
     doc_lengths = {r.doc_id: float(r.vector_length) for r in df_doc_lengths.collect()}
@@ -71,7 +71,8 @@ def compute_all(spark, index_dict, doc_ids, N):
     df_norm = df_tfidf.join(df_doc_lengths, on="doc_id", how="inner")
     df_norm = df_norm.withColumn(
         "normalized_tfidf",
-        F.round(F.col("tfidf") / F.col("vector_length"), 4)
+        F.when(F.col("vector_length") > 0, F.greatest(F.col("tfidf") / F.col("vector_length"), F.lit(0)))
+        .otherwise(F.lit(0))
     )
 
     norm_rows = df_norm.select("term", "doc_id", "normalized_tfidf").collect()
