@@ -1,0 +1,5 @@
+{
+  "extraPaths": ["src", "src/retrieval_ranking", "gui"],
+  "include": ["src", "gui"],
+  "typeCheckingMode": "basic"
+}
