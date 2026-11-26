@@ -42,6 +42,27 @@ def compute_similarity(query_terms, q_norm, norm_matrix, matched_docs):
     return results
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def run_single_term_query(term, df_pos, idf_map, norm_matrix, doc_ids, output_dir):
     term_docs = find_term_docs(df_pos, term)
     matched = sorted(term_docs.keys())

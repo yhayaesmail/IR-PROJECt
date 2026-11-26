@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 from pyspark import SparkContext, SparkConf
 
@@ -24,8 +25,19 @@ def aggregate_doc_positions(items):
     return doc_positions
 
 
-def sort_doc_ids(doc_ids):
-    return sorted(doc_ids, key=lambda x: int(x[1:]))
+def sort_doc_ids(doc_ids):     
+    def key_fn(x):
+        s = str(x)
+        nums = ""
+        for ch in s:
+            if ch.isdigit():
+                nums += ch
+            elif nums:
+                break
+        if nums:
+            return (0, int(nums), s.lower())
+        return (1, s.lower())
+    return sorted(doc_ids, key=key_fn)
 
 
 def format_human_readable(term, doc_positions):
@@ -46,8 +58,8 @@ def main():
     sc = SparkContext(conf=conf)
     sc.setLogLevel("WARN")
 
-    data_dir = "data"
-    output_dir = "outputs"
+    data_dir = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("IR_DATA_DIR", "data")
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else os.environ.get("IR_OUTPUT_DIR", "outputs")
     os.makedirs(output_dir, exist_ok=True)
 
     file_pairs = []

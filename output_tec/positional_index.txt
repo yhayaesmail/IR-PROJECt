@@ -1,0 +1,29 @@
+Positional Index
+Term Document IDs and 1-based positions
+analysis T (3): 5
+analytics T (8): 5
+and T (5): 8
+applications T (10): 7
+artificial T (4): 1; T (7): 1
+cloud T (6): 1; T (9): 1, 3
+computing T (6): 2; T (8): 8; T (9): 2
+data T (2): 4; T (3): 1; T (5): 6; T (6): 4; T (8): 1, 4; T (9): 6; T (10): 9
+explores T (8): 3
+improve T (10): 4
+improves T (2): 3
+intelligence T (4): 2; T (7): 2
+learning T (1): 2; T (2): 2; T (5): 2, 10; T (7): 5; T (10): 2, 6
+machine T (1): 1; T (2): 1; T (5): 1, 3, 9; T (7): 4; T (10): 1, 5
+models T (5): 4; T (7): 6; T (10): 3
+powers T (4): 3
+processing T (2): 5
+research T (8): 7; T (10): 8
+science T (3): 2; T (5): 7; T (8): 2
+smart T (4): 4
+storage T (6): 5; T (9): 4
+support T (3): 4; T (5): 5
+supports T (6): 3; T (9): 5
+systems T (4): 5; T (8): 9; T (9): 7; T (10): 10
+through T (8): 6
+tools T (3): 3
+uses T (7): 3

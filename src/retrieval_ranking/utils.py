@@ -49,4 +49,15 @@ def append_table_file(path, title, headers, rows):
 
 
 def sort_doc_ids(doc_ids):
-    return sorted(doc_ids, key=lambda x: int(x[1:]))
+    def key_fn(x):
+        s = str(x)
+        nums = ""
+        for ch in s:
+            if ch.isdigit():
+                nums += ch
+            elif nums:
+                break
+        if nums:
+            return (0, int(nums), s.lower())
+        return (1, s.lower())
+    return sorted(doc_ids, key=key_fn)

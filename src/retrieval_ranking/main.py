@@ -38,7 +38,7 @@ def main():
     sc = spark.sparkContext
     sc.setLogLevel("WARN")
 
-    output_dir = "outputs"
+    output_dir = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("IR_OUTPUT_DIR", "outputs")
     os.makedirs(output_dir, exist_ok=True)
 
     json_path = os.path.join(output_dir, "positional_index.json")
